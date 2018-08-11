@@ -11,21 +11,69 @@ env:
 matrix:
   include:
     - python: '2.7'
+      env: TOXENV=py27-pytest3
+    - python: '2.7'
       env: TOXENV=py27-pytest30
     - python: '2.7'
       env: TOXENV=py27-pytest31
+    - python: '2.7'
+      env: TOXENV=py27-pytest32
+    - python: '2.7'
+      env: TOXENV=py27-pytest33
+    - python: '2.7'
+      env: TOXENV=py27-pytest34
+    - python: '2.7'
+      env: TOXENV=py27-pytest35
+    - python: '2.7'
+      env: TOXENV=py27-pytest36
+    - python: '3.5'
+      env: TOXENV=py35-pytest3
     - python: '3.5'
       env: TOXENV=py35-pytest30
     - python: '3.5'
       env: TOXENV=py35-pytest31
+    - python: '3.5'
+      env: TOXENV=py35-pytest32
+    - python: '3.5'
+      env: TOXENV=py35-pytest33
+    - python: '3.5'
+      env: TOXENV=py35-pytest34
+    - python: '3.5'
+      env: TOXENV=py35-pytest35
+    - python: '3.5'
+      env: TOXENV=py27-pytest36
+    - python: '3.6'
+      env: TOXENV=py36-pytest3
     - python: '3.6'
       env: TOXENV=py36-pytest30
     - python: '3.6'
       env: TOXENV=py36-pytest31
+    - python: '3.6'
+      env: TOXENV=py36-pytest32
+    - python: '3.6'
+      env: TOXENV=py36-pytest33
+    - python: '3.6'
+      env: TOXENV=py36-pytest34
+    - python: '3.6'
+      env: TOXENV=py36-pytest35
+    - python: '3.6'
+      env: TOXENV=py36-pytest36
+    - python: 'pypy-5.4'
+      env: TOXENV=pypy-pytest3
     - python: 'pypy-5.4'
       env: TOXENV=pypy-pytest30
     - python: 'pypy-5.4'
       env: TOXENV=pypy-pytest31
+    - python: 'pypy-5.4'
+      env: TOXENV=pypy-pytest32
+    - python: 'pypy-5.4'
+      env: TOXENV=pypy-pytest33
+    - python: 'pypy-5.4'
+      env: TOXENV=pypy-pytest34
+    - python: 'pypy-5.4'
+      env: TOXENV=pypy-pytest35
+    - python: 'pypy-5.4'
+      env: TOXENV=pypy-pytest36
 before_install:
   - python --version
   - uname -a
