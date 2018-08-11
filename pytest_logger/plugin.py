@@ -24,12 +24,11 @@ def _late_addoptions(parser, logcfg):
     )
     group = parser.getgroup('logger')
     group.addoption('--logger-logsdir',
-                    help='pick you own logs directory instead of default '
-                         'directory under session tmpdir')
+                    help="pick your own logs directory instead of default directory under session's tmpdir")
 
     if logcfg._enabled:
         parser = _log_option_parser(logcfg._loggers)
-        group.addoption('--log',
+        group.addoption('--loggers',
                         default=parser(logcfg._log_option_default),
                         type=parser,
                         metavar='LOGGER,LOGGER.LEVEL,...',
@@ -60,7 +59,7 @@ class LoggerPlugin(object):
     def __init__(self, config, logcfg):
         self._config = config
         self._logdirlinks = config.hook.pytest_logger_logdirlink(config=config)
-        self._loggers = _loggers_from_logcfg(logcfg, config.getoption('log')) if logcfg._enabled else None
+        self._loggers = _loggers_from_logcfg(logcfg, config.getoption('loggers')) if logcfg._enabled else None
         self._formatter_class = logcfg._formatter_class or DefaultFormatter
         self._logsdir = None
 

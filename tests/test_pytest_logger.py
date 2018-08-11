@@ -24,10 +24,18 @@ def outdir(testdir, dst):
     return testdir.tmpdir.join('..', dst)
 
 
+@pytest.fixture(autouse=True)
+def pytest_ini(testdir, extra_contents=''):
+    makefile(testdir, ['pytest.ini'], """
+        [pytest]
+        console_output_style = classic
+        {extra_contents}
+        """.format(extra_contents=extra_contents))
+
+
 @pytest.fixture
 def conftest_py(testdir):
-    filename = 'conftest.py'
-    makefile(testdir, [filename], """
+    makefile(testdir, ['conftest.py'], """
         import logging
         def pytest_logger_fileloggers(item):
             return [
@@ -35,7 +43,6 @@ def conftest_py(testdir):
                 ('bar', logging.ERROR),
             ]
     """)
-    return filename
 
 
 @pytest.fixture
@@ -430,12 +437,8 @@ def test_logsdir_option(testdir, conftest_py, test_case_py):
 
 
 def test_logsdir_ini(testdir, conftest_py, test_case_py):
-
     logsdir = outdir(testdir, 'myinilogs')
-    makefile(testdir, ['pytest.ini'], """
-        [pytest]
-        logger_logsdir={0}
-    """.format(logsdir))
+    pytest_ini(testdir, 'logger_logsdir={0}'.format(logsdir))
 
     result = testdir.runpytest('-s')
     assert result.ret == 0
@@ -459,13 +462,8 @@ def test_logsdir_ini(testdir, conftest_py, test_case_py):
 
 
 def test_logsdir_cleanup(testdir, conftest_py, test_case_py):
-
     logsdir = outdir(testdir, 'myinilogs')
-
-    makefile(testdir, ['pytest.ini'], """
-        [pytest]
-        logger_logsdir={0}
-    """.format(logsdir))
+    pytest_ini(testdir, 'logger_logsdir={0}'.format(logsdir))
 
     logsdir.ensure('tmpfile').write('\n'.join(Source('this shall be removed')))
     logsdir.join('tmpdir')
@@ -529,7 +527,7 @@ def test_logger_config(testdir, test_case_py):
     ])
 
 
-@pytest.mark.parametrize('log_option', ('', '--log=foo.info,baz'))
+@pytest.mark.parametrize('log_option', ('', '--loggers=foo.info,baz'))
 def test_logger_config_option(testdir, test_case_py, log_option):
     makefile(testdir, ['conftest.py'], """
         def pytest_logger_config(logger_config):
@@ -560,7 +558,7 @@ def test_logger_config_option(testdir, test_case_py, log_option):
         ])
 
 
-@pytest.mark.parametrize('log_option', ('', '--log=foo.info,baz'))
+@pytest.mark.parametrize('log_option', ('', '--loggers=foo.info,baz'))
 def test_logger_config_formatter(testdir, test_case_py, log_option):
     makefile(testdir, ['conftest.py'], """
         import logging
@@ -598,19 +596,19 @@ def test_logger_config_formatter(testdir, test_case_py, log_option):
 def test_logger_config_option_missing_without_hook(testdir, test_case_py, with_hook):
     makefile(testdir, ['conftest.py'], """
         def pytest_addoption(parser):
-            parser.addoption('--log')
-    """ + """
+            parser.addoption('--loggers')
+        """ + ("""
         def pytest_logger_config(logger_config):
             logger_config.add_loggers(['foo', 'bar'], stdout_level='warning', file_level='info')
             logger_config.add_loggers(['baz'], stdout_level='error', file_level='warning')
-    """ if with_hook else "")
+    """ if with_hook else ""))
 
-    result = testdir.runpytest('-s', '--log=foo')
+    result = testdir.runpytest('-s', '--loggers=foo')
     assert result.ret == (3 if with_hook else 0)
 
     if with_hook:
         result.stderr.fnmatch_lines([
-            '*ArgumentError: argument --log: conflicting option string*: --log',
+            '*ArgumentError: argument --loggers: conflicting option string*: --loggers',
         ])
 
 
