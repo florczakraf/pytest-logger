@@ -1,3 +1,4 @@
+from distutils.version import LooseVersion
 import sys
 import pytest
 import platform
@@ -663,10 +664,19 @@ def test_help_prints(testdir, test_case_py):
     assert result.ret == 0
 
 
-@pytest.mark.skip("Since pytest v3.3 progress percentage is being displayed by default during test execution. "
-                  "It interferes with most of the old test cases that assert stdout/err so to not change them, we are "
-                  "now forcing classic output with a set_classic_output auto-use fixture which overrides pytest's "
-                  "console_output_style. We could have at least one test that proves the plugin can work in the new"
-                  "default mode as well.")
-def test_works_with_progress_percentage_prints():
-    assert False
+@pytest.mark.skipif(LooseVersion(pytest.__version__) < LooseVersion('3.3'), reason='Progress was added in pytest v3.3')
+def test_works_with_progress_percentage_prints(testdir, test_case_py):
+    makefile(testdir, ['conftest.py'], """
+            def pytest_logger_stdoutloggers(item):
+                return ['foo']
+        """)
+    result = testdir.runpytest('--override-ini=console_output_style=progress', '-s')
+
+    assert result.ret == 0
+    result.stdout.fnmatch_lines([
+        'test_case.py ',
+        '* err foo: this is error',
+        '* wrn foo: this is warning',
+        '* inf foo: this is info',
+        '.*[[100%]]',  # double brackets for literal match
+    ])
